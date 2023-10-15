@@ -9,13 +9,26 @@ import 'react-date-range/dist/styles.css'
 import 'react-date-range/dist/theme/default.css'
 
 
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  QueryClient,
+  QueryClientProvider,
+} from '@tanstack/react-query'
+
+
+//create a client
+const queryClient = new QueryClient()
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <AuthProviders>
-     <Toaster/>
-     <RouterProvider router={router}>
-     </RouterProvider>
-   
+    <QueryClientProvider client={queryClient}>
+    <Toaster/>
+    <RouterProvider router={router}>
+    </RouterProvider>
+    </QueryClientProvider>
     </AuthProviders>
   </React.StrictMode>,
 )

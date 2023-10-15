@@ -5,6 +5,7 @@ import RoomReservation from "../../components/Rooms/RoomReservation";
 import Container from "../../components/Shared/Container";
 const RoomeDetails = () => {
   const roomData = useLoaderData()
+  // console.log(roomData)
     return (
        <Container>
        <div className="max-w-screen-lg mx-auto ">

@@ -13,11 +13,13 @@ const RoomReservation = ({roomData}) => {
   const [isOpen, setIsOpen]=useState(false)
   const {user, role} = useContext(AuthContext)
   const navigate = useNavigate()
-console.log(roomData._id)
+// console.log(roomData)
   //Price calculation
-  const total_price = parseFloat(formatDistance(new Date(roomData.to), new Date(roomData.from)).split(' ')[0])*roomData.price
-  // console.log(total_price)
-
+  const datesCount = formatDistance(new Date(roomData.to), new Date(roomData.from)).split(' ')[0]
+  console.log(datesCount)
+  const total_price = datesCount ==='less'? parseFloat(roomData.price) : parseFloat(datesCount * roomData.price)
+  
+ 
 
   const [value, setValue] =useState({
     startDate: new Date(roomData.from),
@@ -27,7 +29,8 @@ console.log(roomData._id)
 
 
   //Booking States
-  const [bookingInfo, setBookingInfo] = useState({
+  const [bookingInfo, setBookingInfo] 
+  = useState({
     guest: {
       name:user.displayName,
       email:user.email,
@@ -35,7 +38,7 @@ console.log(roomData._id)
     },
     host:roomData.host.email,
     location:roomData.location,
-    price: total_price,
+    price: total_price ,
     to:value?.endDate,
     from:value?.startDate,
     title:roomData.title,
@@ -73,7 +76,7 @@ console.log(roomData._id)
  const closeModal = () =>{
      setIsOpen(false)
   }
-
+console.log('hello')
     return (
         <div className='bg-white rounded-xl border-[1px] border-neutral-200 overflow-hidden'>
         <div className='flex flex-row items-center gap-1 p-4'>
