@@ -58,3 +58,19 @@ export const getRoom = async id => {
 
 
 
+// Update Room
+
+export const updateRoom = async (roomData,id) => {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/rooms/${id}`,
+    {
+           method: 'PUT',
+            headers: {
+                'content-Type': 'application/json',
+                authorization:`Bearer ${localStorage.getItem('access_token')}`
+
+            },
+            body: JSON.stringify(roomData)
+        })
+    const data = await response.json()
+    return data
+  }

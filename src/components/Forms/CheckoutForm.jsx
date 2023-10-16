@@ -1,13 +1,38 @@
 import {  useElements, useStripe, CardElement } from '@stripe/react-stripe-js';
 import {loadStripe} from '@stripe/stripe-js';
-import { useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import './CheckoutForm.css'
-
+import { AuthContext } from '../../providers/AuthProvides';
+import useAxiosSecure from '../../hooks/useAxiosSecure';
+import { updateStatus } from '../../api/bookings';
+import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
+import {ImSpinner9} from 'react-icons/im'
 const CheckoutForm = ({closeModal,bookingInfo}) => {
+  const {user} = useContext(AuthContext)
+  const [axiosSecure] = useAxiosSecure()
+  const navigate = useNavigate()
     const stripe = useStripe();
     const elements = useElements();
-  
+    const [cardError, setCardError] = useState('')
+    const [processing, setprocessing] = useState(false)
+
+
+  const [clientSecret, setClientSecret] =useState('');
+
+  useEffect(() => {
+    //generate client secret and save in state
+    if(bookingInfo?.price){
+       axiosSecure.post('/create-payment-intent', {price:bookingInfo.price})
+       .then(res=>{
+        console.log(res.data.clientSecret)
+        setClientSecret(res.data.clientSecret)
+       })
+    }
+  },[])
+
     const handleSubmit = async (event) => {
+     
       // Block native form submission.
       event.preventDefault();
   
@@ -34,12 +59,62 @@ const CheckoutForm = ({closeModal,bookingInfo}) => {
   
       if (error) {
         console.log('[error]', error);
+        setCardError(error.message);
       } else {
         console.log('[PaymentMethod]', paymentMethod);
       }
+      setprocessing(true)
+      // confirm payment
+      const {paymentIntent, error:confirmError} =await
+      stripe
+      .confirmCardPayment(clientSecret, {
+        payment_method: {
+          card: card,
+          billing_details: {
+            name: user?.displayName || 'unknown',
+            email: user?.email || 'anonymous'
+          },
+        },
+      })
+      if (error) {
+        console.log('[error]', confirmError);
+        setCardError(confirmError.message);
+      } else {
+        console.log('[PaymentMethod]', paymentMethod);
+        if(paymentIntent.status === 'succeeded') {
+          //save payment info in DB
+          const paymentInfo = {
+            ...bookingInfo, 
+            transactionId: paymentIntent.id,
+            date: new Date(),
+          }
+          axiosSecure.post('/bookings', paymentInfo)
+          .then(res=>{
+            console.log(res.data);
+            if(res.data.insertedId){
+              updateStatus(paymentInfo.roomId, true)
+              .then(data=>{
+                console.log(data)
+                const text = `Booking Successful!, TransactionId: ${paymentIntent.id}`
+                toast.success(text);
+                navigate('/dashboard/my-bookings');
+                setprocessing(false)
+                closeModal()
+              })
+              .catch(err => {
+                setprocessing(false)
+                console.log(err)
+              })
+            }
+          })
+        }
+      }
     };
+
+    
   
     return (
+      <>
       <form onSubmit={handleSubmit}>
         <CardElement
           options={{
@@ -66,14 +141,18 @@ const CheckoutForm = ({closeModal,bookingInfo}) => {
         >
           Cancel
         </button>
-        <button type="submit" disabled={!stripe}
+        <button type="submit" disabled={!stripe || processing || !clientSecret}
         
           className='inline-flex justify-center rounded-md border border-transparent bg-green-100 px-4 py-2 text-sm font-medium text-green-900 hover:bg-green-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2'
         >
-          Pay {bookingInfo.price}$
+         {processing? <ImSpinner9 className='m-auto animate-spin' size={24}></ImSpinner9> :  `Pay ${bookingInfo.price}$`}
         </button>
       </div>
       </form>
+      {
+        cardError&& <p className="text-red-600 ml-8">{cardError}</p>
+      }
+      </>
     );
   };
 export default CheckoutForm;

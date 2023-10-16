@@ -16,7 +16,6 @@ const RoomReservation = ({roomData}) => {
 // console.log(roomData)
   //Price calculation
   const datesCount = formatDistance(new Date(roomData.to), new Date(roomData.from)).split(' ')[0]
-  console.log(datesCount)
   const total_price = datesCount ==='less'? parseFloat(roomData.price) : parseFloat(datesCount * roomData.price)
   
  
@@ -52,31 +51,30 @@ const RoomReservation = ({roomData}) => {
   }
 
 
-  const modalHandeler =() => {
-    addBooking(bookingInfo)
-        .then(data=> {
-          console.log(data)
-          updateStatus(roomData._id, true)
-             .then(data=> {
-              console.log(data)
-              toast.success("Booking Successfully!");
-              navigate('/dashboard/my-bookings')
-              closeModal()
-             })
-             .catch(err =>console.log(err))
+  // const modalHandeler =() => {
+  //   addBooking(bookingInfo)
+  //       .then(data=> {
+  //         console.log(data)
+  //         updateStatus(roomData._id, true)
+  //            .then(data=> {
+  //             console.log(data)
+  //             toast.success("Booking Successfully!");
+  //             navigate('/dashboard/my-bookings')
+  //             closeModal()
+  //            })
+  //            .catch(err =>console.log(err))
              
 
-        })
-        .catch(err =>{
-          console.log(err)
-          closeModal()
-        })
-     console.log(bookingInfo)
-  }
+  //       })
+  //       .catch(err =>{
+  //         console.log(err)
+  //         closeModal()
+  //       })
+  //    console.log(bookingInfo)
+  // }
  const closeModal = () =>{
      setIsOpen(false)
   }
-console.log('hello')
     return (
         <div className='bg-white rounded-xl border-[1px] border-neutral-200 overflow-hidden'>
         <div className='flex flex-row items-center gap-1 p-4'>
@@ -96,7 +94,7 @@ console.log('hello')
           <div>Total</div>
           <div>$ {total_price}</div>
         </div>
-        <BookingModal modalHandeler={modalHandeler} bookingInfo={bookingInfo} isOpen={isOpen} closeModal={closeModal}></BookingModal>
+        <BookingModal  bookingInfo={bookingInfo} isOpen={isOpen} closeModal={closeModal}></BookingModal>
 
       </div>
     );

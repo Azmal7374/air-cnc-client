@@ -8,8 +8,8 @@ import { loadStripe } from '@stripe/stripe-js'
 const stripePromise = loadStripe(`${import.meta.env.VITE_PAYMENT_GATEWAY_PK}`);
 
 
-const BookingModal = ({ modalHandeler, closeModal, isOpen, bookingInfo }) => {
-  console.log(bookingInfo)
+const BookingModal = ({  closeModal, isOpen, bookingInfo }) => {
+  // console.log(bookingInfo)
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as='div' className='relative z-10' onClose={closeModal}>
